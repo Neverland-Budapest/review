@@ -13,7 +13,7 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -69,12 +69,12 @@
         }
         
         .button.pizzeria {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+            box-shadow: 0 4px 15px rgba(86, 171, 47, 0.4);
         }
         
         .button.pizzeria:hover {
-            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+            box-shadow: 0 6px 20px rgba(86, 171, 47, 0.6);
         }
         
         .loading {
@@ -102,7 +102,7 @@
         </button>
         
         <button class="button" onclick="handleClick('escape')">
-            🎮 Escape Room & Bar
+            🥂 Escape Room & Bar
         </button>
         
         <div class="loading" id="loading">Átirányítás...</div>
@@ -111,7 +111,7 @@
 
     <script>
         // Google Apps Script Web App URL - IDE ÍRD BE A SAJÁT WEBAPP URL-ED!
-        const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw8WiI7icZTyYWANV1hd6cEp8QIdS_qTGZHyF0SmHa4BmwHR_c52mWrccpm7VFvkVo1/exec';
+        const WEBAPP_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
         
         // Google Review URL-ek
         const REVIEW_URLS = {
@@ -136,7 +136,7 @@
             `;
         }
         
-        async function handleClick(location) {
+        async         function handleClick(location) {
             // Csak akkor logoljunk, ha van érvényes waiter ID
             if (!waiterId || waiterId.trim() === '') {
                 return;
@@ -151,32 +151,23 @@
             loading.style.display = 'block';
             error.style.display = 'none';
             
-            try {
-                // Adatok küldése a Google Apps Script-nek
-                const response = await fetch(WEBAPP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // Fontos! A GAS miatt szükséges
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        waiterId: waiterId,
-                        location: location
-                    })
-                });
-                
-                // no-cors mode miatt nem tudjuk ellenőrizni a választ,
-                // de ez rendben van - mindenképp átirányítjuk a vendéget
-                
-            } catch (err) {
-                console.error('Logging error:', err);
-                // Hiba esetén is átirányítjuk - a vendég élménye a fontos!
-            }
+            // Adatok küldése a Google Apps Script-nek - NE VÁRJUK MEG!
+            // A fetch fire-and-forget módon indul, azonnal átirányítunk
+            fetch(WEBAPP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    waiterId: waiterId,
+                    location: location
+                }),
+                keepalive: true // Biztosítja hogy az átirányítás után is befejezze a kérést
+            }).catch(err => console.error('Logging error:', err));
             
-            // Kis késleltetés után átirányítás a Google review oldalra
-            setTimeout(() => {
-                window.location.href = REVIEW_URLS[location];
-            }, 500);
+            // AZONNALI átirányítás - ne várjunk semmit!
+            window.location.href = REVIEW_URLS[location];
         }
     </script>
 </body>
