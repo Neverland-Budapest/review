@@ -13,7 +13,11 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background-color: #0A0809;
+            background-image: url('https://neverland.hu/wp-content/uploads/2021/02/Jungle2-min.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -102,7 +106,7 @@
         </button>
         
         <button class="button" onclick="handleClick('escape')">
-            🥂 Escape Room & Bar
+            🔒 Escape Room & Bar 🥂
         </button>
         
         <div class="loading" id="loading">Átirányítás...</div>
@@ -151,8 +155,7 @@
             loading.style.display = 'block';
             error.style.display = 'none';
             
-            // Adatok küldése a Google Apps Script-nek - NE VÁRJUK MEG!
-            // A fetch fire-and-forget módon indul, azonnal átirányítunk
+            // Adatok küldése a Google Apps Script-nek
             fetch(WEBAPP_URL, {
                 method: 'POST',
                 mode: 'no-cors',
@@ -163,11 +166,13 @@
                     waiterId: waiterId,
                     location: location
                 }),
-                keepalive: true // Biztosítja hogy az átirányítás után is befejezze a kérést
+                keepalive: true
             }).catch(err => console.error('Logging error:', err));
             
-            // AZONNALI átirányítás - ne várjunk semmit!
-            window.location.href = REVIEW_URLS[location];
+            // 200ms várakozás hogy a logging megtörténjen, aztán átirányítás
+            setTimeout(() => {
+                window.location.href = REVIEW_URLS[location];
+            }, 200);
         }
     </script>
 </body>
