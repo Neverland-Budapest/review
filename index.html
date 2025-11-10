@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale-1">
   <title>Átirányítás...</title>
   <!-- 
     Minden stílus (CSS) eltávolítva. 
@@ -16,17 +16,23 @@
   <script>
     // URL paraméter kiolvasása
     const params = new URLSearchParams(window.location.search);
-    const id = params.get('id') || 'ISMERETLEN';
+    // FONTOS: Az 'ISMERETLEN' fallback eltávolítva. Ha nincs id, ez 'null' lesz.
+    const id = params.get('id'); 
     
     // GAS webapp URL - EZ A TE LINKED, HAGYD ÍGY
     const gasUrl = 'https://script.google.com/macros/s/AKfycby6IBqY3N4S-1EGlumAnBoiKvyWoR11_TkAmiTjIYq0GEWl6IO1q_c63f0xqhFUCuAvkw/exec';
     
-    // Naplózás AJAX-szal
-    fetch(gasUrl + '?id=' + id)
-      .then(() => console.log('Naplózva'))
-      .catch(() => console.log('Naplózás sikertelen'));
+    // Naplózás AJAX-szal - DE CSAK AKKOR, HA VAN ID!
+    // Ez szűri ki a botokat, amik ?id= nélkül hívják meg az oldalt.
+    if (id) {
+      fetch(gasUrl + '?id=' + id)
+        .then(() => console.log('Naplózva: ' + id))
+        .catch(() => console.log('Naplózás sikertelen: ' + id));
+    }
     
     // AZONNALI átirányítás (nem várja meg a naplózást)
+    // Ez az 'if' blokkon kívül van, így a botok is átirányítódnak,
+    // csak épp naplózás nélkül.
     setTimeout(() => {
       window.location.href = 'https://g.page/r/CZycsjLRYBJfEBM/review';
     }, 200);
