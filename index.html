@@ -1,41 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang="hu">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale-1">
-  <title>Átirányítás...</title>
-  <!-- 
-    Minden stílus (CSS) eltávolítva. 
-    A betöltés így a lehető leggyorsabb lesz.
-  -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Értékelj minket!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            margin: 15px 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .button.pizzeria {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+        
+        .button.pizzeria:hover {
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+        }
+        
+        .loading {
+            display: none;
+            color: #666;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        
+        .error {
+            display: none;
+            color: #f5576c;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-  <p>Átirányítjuk...</p>
+    <div class="container">
+        <h1>Értékelj minket! ⭐</h1>
+        <p class="subtitle">Rate us!</p>
+        
+        <button class="button pizzeria" onclick="handleClick('pizzeria')">
+            🍕 Pizzeria
+        </button>
+        
+        <button class="button" onclick="handleClick('escape')">
+            🎮 Escape Room & Bar
+        </button>
+        
+        <div class="loading" id="loading">Átirányítás...</div>
+        <div class="error" id="error">Hiba történt. Kérlek próbáld újra!</div>
+    </div>
 
-  <!-- A te szkripted, változtatás nélkül, mert tökéletesen működik -->
-  <script>
-    // URL paraméter kiolvasása
-    const params = new URLSearchParams(window.location.search);
-    // FONTOS: Az 'ISMERETLEN' fallback eltávolítva. Ha nincs id, ez 'null' lesz.
-    const id = params.get('id'); 
-    
-    // GAS webapp URL - EZ A TE LINKED, HAGYD ÍGY
-    const gasUrl = 'https://script.google.com/macros/s/AKfycby6IBqY3N4S-1EGlumAnBoiKvyWoR11_TkAmiTjIYq0GEWl6IO1q_c63f0xqhFUCuAvkw/exec';
-    
-    // Naplózás AJAX-szal - DE CSAK AKKOR, HA VAN ID!
-    // Ez szűri ki a botokat, amik ?id= nélkül hívják meg az oldalt.
-    if (id) {
-      fetch(gasUrl + '?id=' + id)
-        .then(() => console.log('Naplózva: ' + id))
-        .catch(() => console.log('Naplózás sikertelen: ' + id));
-    }
-    
-    // AZONNALI átirányítás (nem várja meg a naplózást)
-    // Ez az 'if' blokkon kívül van, így a botok is átirányítódnak,
-    // csak épp naplózás nélkül.
-    setTimeout(() => {
-      window.location.href = 'https://g.page/r/CZycsjLRYBJfEBM/review';
-    }, 200);
-  </script>
+    <script>
+        // Google Apps Script Web App URL - IDE ÍRD BE A SAJÁT WEBAPP URL-ED!
+        const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw8WiI7icZTyYWANV1hd6cEp8QIdS_qTGZHyF0SmHa4BmwHR_c52mWrccpm7VFvkVo1/exec';
+        
+        // Google Review URL-ek
+        const REVIEW_URLS = {
+            pizzeria: 'https://g.page/r/CZycsjLRYBJfEBM/review',
+            escape: 'https://g.page/r/CdtK8sVeU5NwEBM/review'
+        };
+        
+        // URL paraméterek lekérése
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // Felszolgáló ID lekérése
+        const waiterId = getUrlParameter('id');
+        
+        // Ha nincs ID, ne mutassuk a gombokat (bot védelem)
+        if (!waiterId || waiterId.trim() === '') {
+            document.querySelector('.container').innerHTML = `
+                <h1>⚠️ Érvénytelen link</h1>
+                <p class="subtitle" style="margin-top: 20px;">Invalid link</p>
+            `;
+        }
+        
+        async function handleClick(location) {
+            // Csak akkor logoljunk, ha van érvényes waiter ID
+            if (!waiterId || waiterId.trim() === '') {
+                return;
+            }
+            
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const buttons = document.querySelectorAll('.button');
+            
+            // UI frissítés
+            buttons.forEach(btn => btn.disabled = true);
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            
+            try {
+                // Adatok küldése a Google Apps Script-nek
+                const response = await fetch(WEBAPP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Fontos! A GAS miatt szükséges
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        waiterId: waiterId,
+                        location: location
+                    })
+                });
+                
+                // no-cors mode miatt nem tudjuk ellenőrizni a választ,
+                // de ez rendben van - mindenképp átirányítjuk a vendéget
+                
+            } catch (err) {
+                console.error('Logging error:', err);
+                // Hiba esetén is átirányítjuk - a vendég élménye a fontos!
+            }
+            
+            // Kis késleltetés után átirányítás a Google review oldalra
+            setTimeout(() => {
+                window.location.href = REVIEW_URLS[location];
+            }, 500);
+        }
+    </script>
 </body>
 </html>
